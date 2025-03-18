@@ -23,3 +23,11 @@ go.work.sum
 
 # env file
 .env
+$
+
+# IDE Files
+.idea/
+.idea
+.vscode/
+.vscode
+*.iml
