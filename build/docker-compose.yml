@@ -1,0 +1,23 @@
+##########
+#
+# Docker compose file for goAPI
+#
+##########
+
+name: nostr-relay
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: nostr-relay-database
+    hostname: database
+    restart: always
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nostr"] # might need to change this based on the docker value
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file:
+      ../.env
