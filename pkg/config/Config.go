@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"os"
+	"strconv"
+	"time"
 )
 
 /*
@@ -19,6 +21,11 @@ type Configuration struct {
 	relayAddress string
 	relayPort    string
 	relayName    string
+
+	RelayWriteWait      time.Duration
+	RelayPongWait       time.Duration
+	RelayPingWait       time.Duration
+	RelayMaxMessageSize int64
 
 	NIP11Software    string
 	NIP11Description string
@@ -44,6 +51,11 @@ func (conf *Configuration) Init(envFile string) (*Configuration, error) {
 
 	conf.relayAddress = os.Getenv("RELAY_ADDRESS")
 	conf.relayPort = os.Getenv("RELAY_PORT")
+
+	conf.RelayWriteWait = 10 * time.Second
+	conf.RelayPongWait = 60 * time.Second
+	conf.RelayPingWait = conf.RelayPongWait / 2
+	conf.RelayMaxMessageSize, _ = strconv.ParseInt(os.Getenv("RELAY_MAX_MESSAGE_SIZE"), 10, 64)
 
 	conf.NIP11Software = os.Getenv("NIP11_SOFTWARE")
 	conf.NIP11Description = os.Getenv("NIP11_DESCRIPTION")
