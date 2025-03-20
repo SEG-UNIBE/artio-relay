@@ -21,6 +21,6 @@ Handle handles the functionality for this event
 */
 func (c CloseHandler) Handle() string {
 	err := errors.New("WRONG MESSAGE")
-	log.Fatalf("error has occured %v", err)
-	return ""
+	log.Printf("error has occured %v", err)
+	return "WRONG MESSAGE"
 }

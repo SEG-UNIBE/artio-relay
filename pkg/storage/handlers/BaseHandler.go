@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"artio-relay/pkg/config"
 	"artio-relay/pkg/storage/models"
 	"bytes"
 	"encoding/json"
@@ -75,7 +76,7 @@ func (b *BaseHandler) Create(values []byte) (any, error) {
 NewBaseHandler Function to create a new BaseHandler with all the necessary parameters
 */
 func NewBaseHandler[T any](objects []T) BaseHandler {
-	dsn := "host=localhost user=postgres password=password dbname=thingyDB port=5432 sslmode=disable TimeZone=UTC"
+	dsn := config.Config.GetDatabaseConnectionString()
 	dbConn, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	return BaseHandler{Connection: dbConn, objects: objects}
 }

@@ -140,7 +140,7 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	log.Printf("connected from %s", ip)
 	_, message, errMessage := conn.ReadMessage()
 	if errMessage != nil {
-		log.Fatalf("failed to read message: %v", errMessage)
+		log.Printf("failed to read message: %v", errMessage)
 	}
 	var request []json.RawMessage
 	_ = json.Unmarshal(message, &request)

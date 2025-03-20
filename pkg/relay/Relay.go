@@ -6,7 +6,6 @@ import (
 	"artio-relay/pkg/storage"
 	"artio-relay/pkg/webSocket"
 	"encoding/json"
-	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip11"
 	"log"
 )
@@ -56,7 +55,7 @@ func (relay *Relay) HandleMessage(ctx any, ws *webSocket.WebSocket, message []by
 	// function gets executed after the rest of the function is done.
 	defer func() {
 		if notice != "" {
-			err := ws.WriteJSON(nostr.NoticeEnvelope(notice))
+			err := ws.WriteJSON(notice)
 			if err != nil {
 				log.Fatalf("error writing JSON: %v", err)
 			}
