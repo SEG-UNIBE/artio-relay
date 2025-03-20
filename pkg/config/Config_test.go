@@ -2,6 +2,7 @@ package config
 
 import (
 	"testing"
+	"time"
 )
 
 /*
@@ -88,7 +89,7 @@ func TestConfigRNIP11Params(t *testing.T) {
 }
 
 /*
-GetRelayAddress tests the relay address constructor
+TestGetRelayAddress tests the relay address constructor
 */
 func TestGetRelayAddress(t *testing.T) {
 	var config, err = (&(Configuration{})).Init("../../.env.tests")
@@ -101,6 +102,33 @@ func TestGetRelayAddress(t *testing.T) {
 
 	if connString != "0.0.0.0:8000" {
 		t.Fatalf("0.0.0.0:8000 but got %v", connString)
+	}
+}
+
+/*
+TestGetRelayParams tests the server parameters of the config
+*/
+func TestGetRelayParams(t *testing.T) {
+	var config, err = (&(Configuration{})).Init("../../.env.tests")
+
+	if err != nil {
+		t.Fatalf("Error on NewConfiguration: %v", err)
+	}
+
+	if config.RelayWriteWait != 10*time.Second {
+		t.Fatalf("RelayWriteWait does not have the correct value, got: %v", config.RelayWriteWait)
+	}
+
+	if config.RelayPongWait != 60*time.Second {
+		t.Fatalf("RelayPongWait does not have the correct value, got: %v", config.RelayPongWait)
+	}
+
+	if config.RelayPingWait != 30*time.Second {
+		t.Fatalf("RelayPingWait does not have the correct value, got: %v", config.RelayPingWait)
+	}
+
+	if config.RelayPingWait != config.RelayPongWait/2 {
+		t.Fatalf("RelayPingWait is not equal to half of RelayPongWait, got: %v", config.RelayPingWait)
 	}
 }
 

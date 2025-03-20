@@ -17,5 +17,4 @@ func TestRelayNIP11Local(t *testing.T) {
 	if reflect.TypeOf(nip11Informations) != reflect.TypeOf(nip11.RelayInformationDocument{}) {
 		t.Fatalf("the return nip11 information object does not have the correct type")
 	}
-
 }
