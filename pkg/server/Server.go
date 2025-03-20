@@ -1,6 +1,9 @@
 package server
 
 import (
+	"artio-relay/pkg/config"
+	"artio-relay/pkg/relay"
+	"artio-relay/pkg/webSocket"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -12,9 +15,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"nostr-relay/pkg/config"
-	"nostr-relay/pkg/relay"
-	"nostr-relay/pkg/webSocket"
 	"sync"
 	"time"
 )

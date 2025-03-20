@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"artio-relay/pkg/config"
+	"artio-relay/pkg/storage/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"nostr-relay/pkg/config"
-	"nostr-relay/pkg/storage/models"
 )
 
 /*

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"nostr-relay/pkg/config"
-	"nostr-relay/pkg/relay"
+	"artio-relay/pkg/config"
+	"artio-relay/pkg/relay"
 	"reflect"
 	"testing"
 )
