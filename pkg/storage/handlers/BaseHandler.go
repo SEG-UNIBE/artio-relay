@@ -1,11 +1,11 @@
 package handlers
 
 import (
+	"artio-relay/pkg/storage/models"
 	"bytes"
 	"encoding/json"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"nostr-relay/pkg/storage/models"
 )
 
 type IHandler interface {

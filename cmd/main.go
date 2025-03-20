@@ -1,10 +1,10 @@
 package main
 
 import (
+	"artio-relay/pkg/relay"
+	"artio-relay/pkg/server"
+	"artio-relay/pkg/storage"
 	"log"
-	"nostr-relay/pkg/relay"
-	"nostr-relay/pkg/server"
-	"nostr-relay/pkg/storage"
 )
 
 /*

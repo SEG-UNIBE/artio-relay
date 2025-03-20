@@ -1,20 +1,19 @@
 package relay
 
 import (
+	"artio-relay/pkg/config"
+	"artio-relay/pkg/relay/handlers"
+	"artio-relay/pkg/storage"
+	"artio-relay/pkg/webSocket"
 	"encoding/json"
-	"fmt"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip11"
 	"log"
-	"nostr-relay/pkg/config"
-	"nostr-relay/pkg/storage"
-	"nostr-relay/pkg/webSocket"
 )
 
 type IRelay interface {
-	GetNIP11Information()
-	HandleEvent()
-	HandleMessage()
+	GetNIP11Information() nip11.RelayInformationDocument
+	HandleMessage(ctx any, ws *webSocket.WebSocket, message []byte)
 }
 
 type Relay struct {
@@ -77,22 +76,19 @@ func (relay *Relay) HandleMessage(ctx any, ws *webSocket.WebSocket, message []by
 
 	var typ string
 	_ = json.Unmarshal(request[0], &typ)
-	fmt.Println(typ)
-	fmt.Println(request)
-	//switch typ {
-	//case "EVENT":
-	//	notice = relay.doEvent(ctx, ws, request, relay.Storage)
-	//case "REQ":
-	//	notice = relay.doReq(ctx, ws, request, relay.Storage)
-	//case "CLOSE":
-	//	notice = relay.doClose(ctx, ws, request, relay.Storage)
-	//default:
-	//	if cwh, ok := relay.(CustomWebSocketHandler); ok {
-	//		cwh.HandleUnknownType(ws, typ, request)
-	//	} else {
-	//		notice = "unknown message type " + typ
-	//	}
-	//}
+
+	var handler handlers.Handler
+	switch typ {
+	case "EVENT":
+		handler = handlers.EventHandler{Ctx: ctx, Ws: ws, Req: request}
+	case "REQ":
+		handler = handlers.RequestHandler{Ctx: ctx, Ws: ws, Req: request}
+	case "CLOSE":
+		handler = handlers.CloseHandler{Ctx: ctx, Ws: ws, Req: request}
+	default:
+		handler = handlers.UnknownTypeHandler{Ctx: ctx, Ws: ws, Req: request}
+	}
+	notice = handler.Handle()
 }
 
 /*

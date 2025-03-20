@@ -1,4 +1,4 @@
-module nostr-relay
+module artio-relay
 
 go 1.24.0
 

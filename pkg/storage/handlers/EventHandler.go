@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nostr-relay/pkg/storage/models"
+	"artio-relay/pkg/storage/models"
 )
 
 type EventHandler struct {
