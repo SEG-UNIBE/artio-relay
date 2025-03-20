@@ -69,11 +69,11 @@ func TestConfigRNIP11Params(t *testing.T) {
 		t.Fatalf("NIP11 version should be 0.9 but got %v", config.NIP11Version)
 	}
 
-	if config.NIP11Software != "https://gitlab.inf.unibe.ch/SEG/students/theses/christine-groux-michael-kaiser/nostr-relay" {
+	if config.NIP11Software != "https://github.com/SEG-UNIBE/artio-relay" {
 		t.Fatalf("NIP11 software url does not match but got %v", config.NIP11Software)
 	}
 
-	if config.NIP11Description != "relayer implementation for the university of bern" {
+	if config.NIP11Description != "artio relayer implementation for the university of bern" {
 		t.Fatalf("NIP11 description does not match got %v", config.NIP11Description)
 	}
 

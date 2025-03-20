@@ -7,7 +7,7 @@ import (
 )
 
 /*
-TestRelayNIP11Local tests the return type of the NIP11 informations
+TestRelayNIP11Local tests the return type of the NIP11 information
 */
 func TestRelayNIP11Local(t *testing.T) {
 	r := Relay{}

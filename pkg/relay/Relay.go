@@ -1,14 +1,20 @@
 package relay
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip11"
+	"log"
 	"nostr-relay/pkg/config"
 	"nostr-relay/pkg/storage"
+	"nostr-relay/pkg/webSocket"
 )
 
 type IRelay interface {
 	GetNIP11Information()
 	HandleEvent()
+	HandleMessage()
 }
 
 type Relay struct {
@@ -44,6 +50,49 @@ func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 		Software:      config.Config.NIP11Software,
 		Version:       config.Config.NIP11Version,
 	}
+}
+
+func (relay *Relay) HandleMessage(ctx any, ws *webSocket.WebSocket, message []byte) {
+	var notice string
+	// function gets executed after the rest of the function is done.
+	defer func() {
+		if notice != "" {
+			err := ws.WriteJSON(nostr.NoticeEnvelope(notice))
+			if err != nil {
+				log.Fatalf("error writing JSON: %v", err)
+			}
+		}
+	}()
+
+	var request []json.RawMessage
+	if err := json.Unmarshal(message, &request); err != nil {
+		// stop silently
+		return
+	}
+
+	if len(request) < 2 {
+		notice = "request has less than 2 parameters"
+		return
+	}
+
+	var typ string
+	_ = json.Unmarshal(request[0], &typ)
+	fmt.Println(typ)
+	fmt.Println(request)
+	//switch typ {
+	//case "EVENT":
+	//	notice = relay.doEvent(ctx, ws, request, relay.Storage)
+	//case "REQ":
+	//	notice = relay.doReq(ctx, ws, request, relay.Storage)
+	//case "CLOSE":
+	//	notice = relay.doClose(ctx, ws, request, relay.Storage)
+	//default:
+	//	if cwh, ok := relay.(CustomWebSocketHandler); ok {
+	//		cwh.HandleUnknownType(ws, typ, request)
+	//	} else {
+	//		notice = "unknown message type " + typ
+	//	}
+	//}
 }
 
 /*
