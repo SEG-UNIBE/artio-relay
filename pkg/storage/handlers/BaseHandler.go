@@ -24,6 +24,7 @@ type BaseHandler struct {
 	IHandler
 	objects    any
 	Connection *gorm.DB
+	tableName  string
 }
 
 /*
