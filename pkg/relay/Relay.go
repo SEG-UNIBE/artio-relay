@@ -5,6 +5,7 @@ import (
 	"artio-relay/pkg/relay/handlers"
 	"artio-relay/pkg/storage"
 	"artio-relay/pkg/webSocket"
+	"context"
 	"encoding/json"
 	"github.com/nbd-wtf/go-nostr/nip11"
 	"log"
@@ -50,7 +51,7 @@ func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 	}
 }
 
-func (relay *Relay) HandleMessage(ctx any, ws *webSocket.WebSocket, message []byte) {
+func (relay *Relay) HandleMessage(ctx context.Context, ws *webSocket.WebSocket, message []byte) {
 	var notice string
 	// function gets executed after the rest of the function is done.
 	defer func() {
