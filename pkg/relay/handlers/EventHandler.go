@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"artio-relay/pkg/storage/handlers"
-	"artio-relay/pkg/storage/models"
+	"artio-relay/pkg/storage/adapter"
 	"artio-relay/pkg/webSocket"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/nbd-wtf/go-nostr"
+	"log"
 )
 
 /*
@@ -47,12 +47,12 @@ func (e EventHandler) Handle() string {
 	} else if !ok {
 		return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "invalid: signature is invalid"})
 	}
-	//TODO: Handle the insert into the database
-	fmt.Println(evt)
-	event := models.Event{Id: evt.ID, Pubkey: evt.PubKey, Kind: uint32(evt.Kind), Sig: evt.Sig, Content: evt.Content}
-	x, err := handlers.EventHandlerObject.CreateEvent(event)
-	fmt.Println(x)
-	fmt.Println(err)
+
+	eventAdapter := adapter.EventAdapter{}
+	_, err := eventAdapter.Create(evt)
+	if err != nil {
+		log.Printf("Error occured %v", err)
+	}
 	return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: true, Reason: ""})
 
 }
