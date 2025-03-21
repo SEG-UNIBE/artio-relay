@@ -17,3 +17,18 @@ func (e *EventAdapter) Create(event nostr.Event) (any, error) {
 	x, err := handlers.EventHandlerObject.CreateEvent(eventModel)
 	return x, err
 }
+
+/*
+Get all the events out of the database for a given nostr.Filter
+*/
+func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
+	// TODO implement the adapter functionality
+	// should translate nostr.filter into a gorm understandable model
+
+	if filter.Limit == 0 {
+		// query only for the limited amount of events (order by time)
+	}
+
+	var events []nostr.Event
+	return events, nil
+}
