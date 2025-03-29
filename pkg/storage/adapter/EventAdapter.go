@@ -4,6 +4,7 @@ import (
 	"artio-relay/pkg/storage/handlers"
 	"artio-relay/pkg/storage/models"
 	"github.com/nbd-wtf/go-nostr"
+	"log"
 )
 
 type EventAdapter struct {
@@ -30,5 +31,18 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	}
 
 	var events []nostr.Event
+	var irResults []models.Event
+	var err error
+	irResults, err = handlers.EventHandlerObject.GetEvents(filter)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: adapt the result here
+	if irResults == nil {
+		log.Println("No results found")
+	}
+
 	return events, nil
 }
