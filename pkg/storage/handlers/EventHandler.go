@@ -10,7 +10,7 @@ type EventHandler struct {
 }
 
 func (e EventHandler) CreateEvent(event models.Event) (any, error) {
-	e.Connection.Table("events") // TODO: Fix this stupid thing that will no work
+	e.Connection.Table("events")
 	results := e.Connection.Create(&event)
 	return results, nil
 }
@@ -24,8 +24,29 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 	e.Connection.Table("events")
 
 	// TODO: need to transform this into a usable event return type
-	e.Connection.Where(map[string]interface{}{"id": filter.IDs}).Where(map[string]interface{}{"pubkey": filter.Authors}).Where(map[string]interface{}{"kind": filter.Kinds}).Find(&results)
+	transaction := e.Connection
 
+	if filter.IDs != nil {
+		transaction = transaction.Where(map[string]interface{}{"id": filter.IDs})
+	}
+
+	if filter.Since != nil {
+		transaction = transaction.Where("Created >= ?", filter.Since)
+	}
+
+	if filter.Until != nil {
+		transaction = transaction.Where("Created < ?", filter.Until)
+	}
+
+	if filter.Authors != nil {
+		transaction = transaction.Where(map[string]interface{}{"pubkey": filter.Authors})
+	}
+
+	if filter.Kinds != nil {
+		transaction = transaction.Where(map[string]interface{}{"kind": filter.Kinds})
+	}
+
+	transaction.Find(&results)
 	return results, nil
 }
 

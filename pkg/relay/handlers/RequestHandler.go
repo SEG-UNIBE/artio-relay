@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nbd-wtf/go-nostr"
+	"log"
 )
 
 /*
@@ -22,7 +23,7 @@ type RequestHandler struct {
 Handle handles the functionality for this event
 */
 func (r RequestHandler) Handle() string {
-
+	fmt.Println("typ1")
 	var id string
 	json.Unmarshal(r.Req[1], &id)
 	if id == "" {
@@ -30,6 +31,7 @@ func (r RequestHandler) Handle() string {
 	}
 
 	filters := make(nostr.Filters, len(r.Req)-2)
+	fmt.Println(filters)
 	for i, filterReq := range r.Req[2:] {
 		if err := json.Unmarshal(
 			filterReq,
@@ -50,6 +52,7 @@ func (r RequestHandler) Handle() string {
 		if err != nil {
 			return fmt.Sprintf("Error while fetching data from database with: %v ", err)
 		}
+		log.Println(events)
 
 		if len(events) == 0 {
 			return fmt.Sprintf("Length of events is zero, no Events found for the given filter criteria")
