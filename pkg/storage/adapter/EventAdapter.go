@@ -31,15 +31,40 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	}
 
 	var events []nostr.Event
-	var irResults []models.Event
-	var err error
-	irResults, err = handlers.EventHandlerObject.GetEvents(filter)
+	var irResults, err = handlers.EventHandlerObject.GetEvents(filter)
 
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: adapt the result here
+
+	for _, result := range irResults {
+
+		// type Event struct {
+		// 	ID        string
+		// 	PubKey    string
+		// 	CreatedAt Timestamp
+		// 	Kind      int
+		// 	Tags      Tags
+		// 	Content   string
+		// 	Sig       string
+		// }
+		tmpEvent := nostr.Event{
+			ID:        result.Id,
+			PubKey:    result.Pubkey,
+			CreatedAt: nostr.Timestamp(result.Created),
+			Kind:      int(result.Kind),
+			Content:   result.Content,
+			Sig:       result.Sig,
+		}
+		events = append(events, tmpEvent)
+
+		// handling the max amount of results to return
+		if len(events) >= filter.Limit {
+			return events, nil
+		}
+	}
 	if irResults == nil {
 		log.Println("No results found")
 	}
