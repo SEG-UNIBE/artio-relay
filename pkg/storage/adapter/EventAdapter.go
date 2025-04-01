@@ -31,15 +31,23 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	}
 
 	var events []nostr.Event
+	// fetching the intermediate (ir) results from the database
 	var irResults, err = handlers.EventHandlerObject.GetEvents(filter)
 
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: adapt the result here
+	if filter.Limit == 0 {
+		filter.Limit = 999999
+	}
 
 	for _, result := range irResults {
+
+		// handling the max amount of results to return
+		if len(events) >= filter.Limit {
+			return events, nil
+		}
 
 		// type Event struct {
 		// 	ID        string
@@ -60,10 +68,6 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 		}
 		events = append(events, tmpEvent)
 
-		// handling the max amount of results to return
-		if len(events) >= filter.Limit {
-			return events, nil
-		}
 	}
 	if irResults == nil {
 		log.Println("No results found")
