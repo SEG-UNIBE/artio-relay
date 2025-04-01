@@ -101,7 +101,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else if r.Header.Get("Upgrade") == "websocket" {
 		s.HandleWebsocket(w, r)
 	} else {
-		log.Fatal("Not implemented") // TODO: implement this
+		s.serveMux.ServeHTTP(w, r)
 	}
 
 	/*
