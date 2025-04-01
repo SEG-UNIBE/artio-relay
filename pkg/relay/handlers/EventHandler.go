@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nbd-wtf/go-nostr"
-	"log"
 )
 
 /*
@@ -31,7 +30,8 @@ func (e EventHandler) Handle() string {
 	// it's a new event
 	var evt nostr.Event
 	if err := json.Unmarshal(e.Req[latestIndex], &evt); err != nil {
-		return "failed to decode event: " + err.Error()
+		reason := "failed to decode event" + err.Error()
+		return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: reason})
 	}
 
 	// check id and return error if its NOK
@@ -51,8 +51,8 @@ func (e EventHandler) Handle() string {
 	eventAdapter := adapter.EventAdapter{}
 	_, err := eventAdapter.Create(evt)
 	if err != nil {
-		log.Printf("Error occured %v", err)
+		reason := "event occured while inserting into the database"
+		return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: reason})
 	}
 	return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: true, Reason: ""})
-
 }
