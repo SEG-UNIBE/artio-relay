@@ -30,7 +30,7 @@ func (e EventHandler) Handle() string {
 	// it's a new event
 	var evt nostr.Event
 	if err := json.Unmarshal(e.Req[latestIndex], &evt); err != nil {
-		reason := "failed to decode event" + err.Error()
+		reason := "failed to decode event " + err.Error()
 		return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: reason})
 	}
 

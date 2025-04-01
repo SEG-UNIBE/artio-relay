@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/nbd-wtf/go-nostr"
 	"testing"
 )
@@ -18,7 +19,7 @@ func TestEventHandler_DecodeError(t *testing.T) {
 
 	outputString := eh.Handle()
 
-	if outputString != "failed to decode event: unexpected end of JSON input" {
+	if outputString != fmt.Sprintf("%v", nostr.OKEnvelope{EventID: "", OK: false, Reason: "failed to decode event unexpected end of JSON input"}) {
 		t.Fatalf("Handler does not properly check for invalid JSON Input id, result was: %v", outputString)
 	}
 }
