@@ -23,7 +23,6 @@ type RequestHandler struct {
 Handle handles the functionality for this event
 */
 func (r RequestHandler) Handle() string {
-	fmt.Println("typ1")
 	var id string
 	json.Unmarshal(r.Req[1], &id)
 	if id == "" {

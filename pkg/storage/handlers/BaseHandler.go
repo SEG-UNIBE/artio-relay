@@ -68,7 +68,7 @@ func (b *BaseHandler) Create(values []byte) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	b.Connection.Table("events") // TODO: Fix this stupid thing that will no work
+	//b.Connection.Table("events") // TODO: Fix this stupid thing that will no work
 	results := b.Connection.Create(&object)
 	return results, nil
 }

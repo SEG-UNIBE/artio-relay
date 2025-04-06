@@ -2,7 +2,9 @@ package server
 
 import (
 	"artio-relay/pkg/config"
+	"artio-relay/pkg/logging"
 	"artio-relay/pkg/relay"
+	"artio-relay/pkg/storage/adapter"
 	"artio-relay/pkg/webSocket"
 	"context"
 	"crypto/rand"
@@ -57,6 +59,8 @@ type Server struct {
 
 	clientsMu sync.Mutex
 	clients   map[*websocket.Conn]struct{}
+
+	LogAdapter adapter.LogAdapter
 }
 
 /*
@@ -97,22 +101,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		info := s.relay.GetNIP11Information()
 
 		_ = json.NewEncoder(w).Encode(info)
+		go logging.ArtioLogger.LogNIP11(r.RemoteAddr)
 
 	} else if r.Header.Get("Upgrade") == "websocket" {
 		s.HandleWebsocket(w, r)
 	} else {
 		s.serveMux.ServeHTTP(w, r)
 	}
-
-	/*
-		if r.Header.Get("Upgrade") == "websocket" {
-			s.HandleWebsocket(w, r)
-		} else if r.Header.Get("Accept") == "application/nostr+json" {
-			s.HandleNIP11(w, r)
-		} else {
-			s.serveMux.ServeHTTP(w, r)
-		}
-	*/
 }
 
 /*
@@ -137,7 +132,7 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	} else if realIP := r.Header.Get("X-Real-Ip"); realIP != "" {
 		ip = realIP
 	}
-	log.Printf("connected from %s", ip)
+	go logging.ArtioLogger.LogConnect(ip)
 	_, message, errMessage := conn.ReadMessage()
 	if errMessage != nil {
 		log.Printf("failed to read message: %v", errMessage)
@@ -160,7 +155,7 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 				//removeListener(ws)
 			}
 			s.clientsMu.Unlock()
-			log.Printf("disconnected from %s\n", ip)
+			go logging.ArtioLogger.LogDisconnect(ip)
 		}()
 
 		// set some limits on the connection to assure the correct functionality
@@ -179,7 +174,12 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 
 		for {
 			typ, message, err := conn.ReadMessage()
-			fmt.Println("typ:", typ, "message:", string(message), "err:", err)
+			if err != nil {
+				fmt.Println("typ:", typ, "message:", string(message), "err:", err)
+			} else {
+				go logging.ArtioLogger.LogRequest("GENREQ", string(message), ip)
+			}
+
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(
 					err,
@@ -217,7 +217,7 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 					log.Printf("error writing ping: %v; closing websocket", err)
 					return
 				}
-				log.Printf("pinging for %s", ip)
+				go logging.ArtioLogger.LogPing(ip)
 			case <-ctx.Done():
 				return
 			}
@@ -226,5 +226,5 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewServer(relay *relay.Relay) *Server {
-	return &Server{relay: relay, upgrader: webSocket.NewUpgrader()}
+	return &Server{relay: relay, upgrader: webSocket.NewUpgrader(), LogAdapter: adapter.LogAdapter{}}
 }
