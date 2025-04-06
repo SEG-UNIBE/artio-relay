@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/nbd-wtf/go-nostr"
 	"log"
 )
@@ -38,14 +37,17 @@ func (e EventHandler) Handle() string {
 	hash := sha256.Sum256(evt.Serialize())
 	if id := hex.EncodeToString(hash[:]); id != evt.ID {
 		reason := "invalid: event id is computed incorrectly"
-		return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: reason})
+		_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: reason})
+		return ""
 	}
 
 	// check signature
 	if ok, err := evt.CheckSignature(); err != nil {
-		return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "error: failed to verify signature"})
+		_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "error: failed to verify signature"})
+		return ""
 	} else if !ok {
-		return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "invalid: signature is invalid"})
+		_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "invalid: signature is invalid"})
+		return ""
 	}
 
 	eventAdapter := adapter.EventAdapter{}
@@ -53,6 +55,7 @@ func (e EventHandler) Handle() string {
 	if err != nil {
 		log.Printf("Error occured %v", err)
 	}
-	return fmt.Sprintf("%v", nostr.OKEnvelope{EventID: evt.ID, OK: true, Reason: ""})
+	_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: true, Reason: ""})
+	return ""
 
 }
