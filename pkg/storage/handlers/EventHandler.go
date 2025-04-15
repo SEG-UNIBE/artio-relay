@@ -46,6 +46,9 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 		transaction = transaction.Where(map[string]interface{}{"kind": filter.Kinds})
 	}
 
+	// order the end result
+	transaction.Order("Created desc")
+
 	transaction.Find(&results)
 	return results, nil
 }
