@@ -30,7 +30,6 @@ func (r RequestHandler) Handle() string {
 	}
 
 	filters := make(nostr.Filters, len(r.Req)-2)
-	fmt.Println(filters)
 	for i, filterReq := range r.Req[2:] {
 		if err := json.Unmarshal(
 			filterReq,
@@ -49,12 +48,13 @@ func (r RequestHandler) Handle() string {
 		events, err := eventAdapter.Get(filter)
 
 		if err != nil {
-			return fmt.Sprintf("Error while fetching data from database with: %v ", err)
+			_ = r.Ws.WriteJSON(nostr.OKEnvelope{EventID: id, OK: false, Reason: "Error while fetching data from database"})
+			fmt.Printf("Error while fetching data from database with: %v \n", err)
 		}
 		log.Println(events)
 
 		if len(events) == 0 {
-			return fmt.Sprintf("Length of events is zero, no Events found for the given filter criteria")
+			//return fmt.Sprintf("Length of events is zero, no Events found for the given filter criteria")
 		}
 		for _, event := range events {
 			_ = r.Ws.WriteJSON(nostr.EventEnvelope{SubscriptionID: &id, Event: event})
