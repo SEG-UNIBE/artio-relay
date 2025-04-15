@@ -15,13 +15,13 @@ Create adapts the nostr event to the model in the database and handles the inser
 */
 func (e *EventAdapter) Create(event nostr.Event) (any, error) {
 	eventModel := models.Event{
-		Id:        event.ID,
-		Created:   event.CreatedAt.Time().Unix(),
-		Pubkey:    event.PubKey,
-		Kind:      uint32(event.Kind),
-		Sig:       event.Sig,
-		Content:   event.Content,
-		TagValues: event.Tags,
+		Id:      event.ID,
+		Created: event.CreatedAt.Time().Unix(),
+		Pubkey:  event.PubKey,
+		Kind:    uint32(event.Kind),
+		Sig:     event.Sig,
+		Content: event.Content,
+		Tags:    event.Tags,
 	}
 	x, err := handlers.EventHandlerObject.CreateEvent(eventModel)
 	return x, err
@@ -73,7 +73,7 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 			Kind:      int(result.Kind),
 			Content:   result.Content,
 			Sig:       result.Sig,
-			Tags:      result.TagValues,
+			Tags:      result.Tags,
 		}
 		events = append(events, tmpEvent)
 
