@@ -2,6 +2,7 @@ package relay
 
 import (
 	"artio-relay/pkg/config"
+	"artio-relay/pkg/logging"
 	"artio-relay/pkg/relay/handlers"
 	"artio-relay/pkg/storage"
 	"artio-relay/pkg/webSocket"
@@ -78,6 +79,7 @@ func (relay *Relay) HandleMessage(ctx context.Context, ws *webSocket.WebSocket, 
 	_ = json.Unmarshal(request[0], &typ)
 
 	var handler handlers.Handler
+	logging.ArtioLogger.LogHandling("RELAYHANDLE", typ, ws.GetRemoteIP())
 	switch typ {
 	case "EVENT":
 		handler = handlers.EventHandler{Ctx: ctx, Ws: ws, Req: request}

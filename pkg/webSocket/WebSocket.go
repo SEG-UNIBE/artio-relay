@@ -36,3 +36,10 @@ func (ws *WebSocket) WriteMessage(t int, b []byte) error {
 	defer ws.mutex.Unlock()
 	return ws.Conn.WriteMessage(t, b)
 }
+
+/*
+GetRemoteIP returns the IP Address of the remote end of the connection
+*/
+func (ws *WebSocket) GetRemoteIP() string {
+	return ws.Conn.RemoteAddr().String()
+}

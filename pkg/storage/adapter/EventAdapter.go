@@ -14,7 +14,15 @@ type EventAdapter struct {
 Create adapts the nostr event to the model in the database and handles the insert.
 */
 func (e *EventAdapter) Create(event nostr.Event) (any, error) {
-	eventModel := models.Event{Id: event.ID, Pubkey: event.PubKey, Kind: uint32(event.Kind), Sig: event.Sig, Content: event.Content}
+	eventModel := models.Event{
+		Id:      event.ID,
+		Created: event.CreatedAt.Time().Unix(),
+		Pubkey:  event.PubKey,
+		Kind:    uint32(event.Kind),
+		Sig:     event.Sig,
+		Content: event.Content,
+		Tags:    event.Tags,
+	}
 	x, err := handlers.EventHandlerObject.CreateEvent(eventModel)
 	return x, err
 }
@@ -31,15 +39,23 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	}
 
 	var events []nostr.Event
+	// fetching the intermediate (ir) results from the database
 	var irResults, err = handlers.EventHandlerObject.GetEvents(filter)
 
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: adapt the result here
+	if filter.Limit == 0 {
+		filter.Limit = 999999
+	}
 
 	for _, result := range irResults {
+
+		// handling the max amount of results to return
+		if len(events) >= filter.Limit {
+			return events, nil
+		}
 
 		// type Event struct {
 		// 	ID        string
@@ -57,13 +73,10 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 			Kind:      int(result.Kind),
 			Content:   result.Content,
 			Sig:       result.Sig,
+			Tags:      result.Tags,
 		}
 		events = append(events, tmpEvent)
 
-		// handling the max amount of results to return
-		if len(events) >= filter.Limit {
-			return events, nil
-		}
 	}
 	if irResults == nil {
 		log.Println("No results found")

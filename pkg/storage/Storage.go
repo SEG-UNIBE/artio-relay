@@ -41,7 +41,7 @@ func (s *Storage) Init() error {
 setupModel initializes the newest model in the database
 */
 func (s *Storage) setupModel() error {
-	migrateErr := s.Connection.AutoMigrate(&models.Event{})
+	migrateErr := s.Connection.AutoMigrate(&models.Event{}, &models.Log{})
 	if migrateErr != nil {
 		return migrateErr
 	}
