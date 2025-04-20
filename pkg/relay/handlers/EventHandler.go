@@ -51,6 +51,23 @@ func (e EventHandler) Handle() string {
 	}
 
 	eventAdapter := adapter.EventAdapter{}
+
+	// handle the deletion requests specified in NIP-09
+	if evt.Kind == 5 {
+		err, allDeleted := eventAdapter.Delete(evt)
+		if err != nil {
+			log.Printf("Error occured %v", err)
+			_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "error while processing the delete request"})
+			return ""
+		}
+		if allDeleted != true {
+			_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "invalid permissions to delete detected"})
+			return ""
+		}
+		_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: true, Reason: ""})
+		return ""
+	}
+
 	_, err := eventAdapter.Create(evt)
 	if err != nil {
 		log.Printf("Error occured %v", err)
