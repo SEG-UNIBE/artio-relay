@@ -107,7 +107,7 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 			if len(valueList) == 2 {
 				kind, _ := strconv.ParseInt(valueList[0], 10, 32)
 				pubkey := valueList[1]
-				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}}
+				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Since: &event.CreatedAt}
 			}
 
 			if len(valueList) == 3 {
@@ -115,7 +115,7 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 				pubkey := valueList[1]
 				dIdentifier := valueList[2]
 				tagMap := nostr.TagMap{"d": []string{dIdentifier}}
-				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Tags: tagMap}
+				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Tags: tagMap, Since: &event.CreatedAt}
 			}
 		}
 
@@ -144,6 +144,4 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 	}
 	return nil, deleteAllowed
 
-	// we did not encounter an error
-	return nil, false
 }
