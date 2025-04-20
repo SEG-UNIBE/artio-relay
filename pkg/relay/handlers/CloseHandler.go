@@ -3,8 +3,7 @@ package handlers
 import (
 	"artio-relay/pkg/webSocket"
 	"encoding/json"
-	"errors"
-	"log"
+	"github.com/nbd-wtf/go-nostr"
 )
 
 /*
@@ -20,7 +19,14 @@ type CloseHandler struct {
 Handle handles the functionality for this event
 */
 func (c CloseHandler) Handle() string {
-	err := errors.New("WRONG MESSAGE")
-	log.Printf("error has occured %v", err)
-	return "WRONG MESSAGE"
+
+	var id string
+	_ = json.Unmarshal(c.Req[1], &id)
+	if id == "" {
+		return "REQ has no <id>"
+	}
+
+	// TODO: remove listener
+	_ = c.Ws.WriteJSON(nostr.NoticeEnvelope(""))
+	return ""
 }
