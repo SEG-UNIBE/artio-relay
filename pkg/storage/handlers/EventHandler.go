@@ -61,10 +61,12 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 
 	for i := range results {
 		result := &results[i]
-		appended := false
+
+		toAppend := true
 
 		for tagKey, tagValues := range filter.Tags {
 			// loop over all the available tags
+			tagFound := false
 			// tagValues is a array
 			for resultTagId := range result.Tags {
 				tmpTag := result.Tags[resultTagId]
@@ -73,14 +75,14 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 					continue
 				}
 				if tmpTag[0] == tagKey && slices.Contains(tagValues, tmpTag[1]) {
-					outputResults = append(outputResults, *result)
-					appended = true
+					tagFound = true
 					break
 				}
 			}
-			if appended {
-				break
-			}
+			toAppend = toAppend && tagFound
+		}
+		if toAppend {
+			outputResults = append(outputResults, *result)
 		}
 	}
 	return outputResults, nil
