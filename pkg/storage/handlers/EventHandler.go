@@ -36,7 +36,7 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 	}
 
 	if filter.Until != nil {
-		transaction = transaction.Where("Created < ?", filter.Until)
+		transaction = transaction.Where("Created <= ?", filter.Until)
 	}
 
 	if filter.Authors != nil {
