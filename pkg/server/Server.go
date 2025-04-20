@@ -133,12 +133,6 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 		ip = realIP
 	}
 	go logging.ArtioLogger.LogConnect(ip)
-	_, message, errMessage := conn.ReadMessage()
-	if errMessage != nil {
-		log.Printf("failed to read message: %v", errMessage)
-	}
-	var request []json.RawMessage
-	_ = json.Unmarshal(message, &request)
 
 	ws := challenge(conn)
 	ctx, cancel := context.WithCancel(context.Background())
