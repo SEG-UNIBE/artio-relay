@@ -24,11 +24,10 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 	var results []models.Event
 	e.Connection.Table("events")
 
-	// TODO: need to transform this into a usable event return type
 	transaction := e.Connection
 
 	if filter.IDs != nil {
-		transaction = transaction.Where(map[string]interface{}{"id": filter.IDs})
+		transaction = transaction.Where(map[string]interface{}{"event_id": filter.IDs})
 	}
 
 	if filter.Since != nil {
@@ -84,6 +83,24 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 		}
 	}
 	return outputResults, nil
+}
+
+/*
+DeleteEvent Handles the deletion of Events
+*/
+func (e EventHandler) DeleteEvent(event models.Event) error {
+	e.Connection.Table("events")
+	_ = e.Connection.Delete(event)
+	return nil
+}
+
+/*
+DeleteEvents Handles the deletion of Events
+*/
+func (e EventHandler) DeleteEvents(events []models.Event) error {
+	e.Connection.Table("events")
+	_ = e.Connection.Delete(events)
+	return nil
 }
 
 var baseHandler = NewBaseHandler([]models.Event{})
