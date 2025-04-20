@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"artio-relay/pkg/storage/models"
+	"fmt"
 	"github.com/nbd-wtf/go-nostr"
 	"slices"
 )
@@ -99,8 +100,9 @@ DeleteEvents Handles the deletion of Events
 */
 func (e EventHandler) DeleteEvents(events []models.Event) error {
 	e.Connection.Table("events")
-	_ = e.Connection.Delete(events)
-	return nil
+	fmt.Println(events)
+	res := e.Connection.Delete(events)
+	return res.Error
 }
 
 var baseHandler = NewBaseHandler([]models.Event{})
