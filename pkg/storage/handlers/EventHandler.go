@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"artio-relay/pkg/storage/models"
+	"fmt"
 	"github.com/nbd-wtf/go-nostr"
 	"slices"
 )
@@ -24,11 +25,10 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 	var results []models.Event
 	e.Connection.Table("events")
 
-	// TODO: need to transform this into a usable event return type
 	transaction := e.Connection
 
 	if filter.IDs != nil {
-		transaction = transaction.Where(map[string]interface{}{"id": filter.IDs})
+		transaction = transaction.Where(map[string]interface{}{"event_id": filter.IDs})
 	}
 
 	if filter.Since != nil {
@@ -36,7 +36,7 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 	}
 
 	if filter.Until != nil {
-		transaction = transaction.Where("Created < ?", filter.Until)
+		transaction = transaction.Where("Created <= ?", filter.Until)
 	}
 
 	if filter.Authors != nil {
@@ -61,10 +61,12 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 
 	for i := range results {
 		result := &results[i]
-		appended := false
+
+		toAppend := true
 
 		for tagKey, tagValues := range filter.Tags {
 			// loop over all the available tags
+			tagFound := false
 			// tagValues is a array
 			for resultTagId := range result.Tags {
 				tmpTag := result.Tags[resultTagId]
@@ -73,17 +75,36 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 					continue
 				}
 				if tmpTag[0] == tagKey && slices.Contains(tagValues, tmpTag[1]) {
-					outputResults = append(outputResults, *result)
-					appended = true
+					tagFound = true
 					break
 				}
 			}
-			if appended {
-				break
-			}
+			toAppend = toAppend && tagFound
+		}
+		if toAppend {
+			outputResults = append(outputResults, *result)
 		}
 	}
 	return outputResults, nil
+}
+
+/*
+DeleteEvent Handles the deletion of Events
+*/
+func (e EventHandler) DeleteEvent(event models.Event) error {
+	e.Connection.Table("events")
+	_ = e.Connection.Delete(event)
+	return nil
+}
+
+/*
+DeleteEvents Handles the deletion of Events
+*/
+func (e EventHandler) DeleteEvents(events []models.Event) error {
+	e.Connection.Table("events")
+	fmt.Println(events)
+	res := e.Connection.Delete(events)
+	return res.Error
 }
 
 var baseHandler = NewBaseHandler([]models.Event{})
