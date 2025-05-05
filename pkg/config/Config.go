@@ -32,6 +32,8 @@ type Configuration struct {
 	NIP11Version     string
 	NIP11Pubkey      string
 	NIP11Contact     string
+	NIP11Icon        string
+	NIP11Banner      string
 }
 
 /*
@@ -62,6 +64,8 @@ func (conf *Configuration) Init(envFile string) (*Configuration, error) {
 	conf.NIP11Version = os.Getenv("NIP11_VERSION")
 	conf.NIP11Contact = os.Getenv("NIP11_CONTACT")
 	conf.NIP11Pubkey = os.Getenv("NIP11_PUBKEY")
+	conf.NIP11Banner = os.Getenv("NIP11_BANNER")
+	conf.NIP11Icon = os.Getenv("NIP11_ICON")
 
 	return conf, nil
 }

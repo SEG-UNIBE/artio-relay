@@ -49,6 +49,8 @@ func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 		SupportedNIPs: supportedNIPs,
 		Software:      config.Config.NIP11Software,
 		Version:       config.Config.NIP11Version,
+		Icon:          config.Config.NIP11Banner,
+		Banner:        config.Config.NIP11Banner,
 	}
 }
 
