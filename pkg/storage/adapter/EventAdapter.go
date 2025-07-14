@@ -53,21 +53,10 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	}
 
 	for _, result := range irResults {
-
 		// handling the max amount of results to return
 		if len(events) >= filter.Limit {
 			return events, nil
 		}
-
-		// type Event struct {
-		// 	ID        string
-		// 	PubKey    string
-		// 	CreatedAt Timestamp
-		// 	Kind      int
-		// 	Tags      Tags
-		// 	Content   string
-		// 	Sig       string
-		// }
 		tmpEvent := nostr.Event{
 			ID:        result.EventId,
 			PubKey:    result.Pubkey,
