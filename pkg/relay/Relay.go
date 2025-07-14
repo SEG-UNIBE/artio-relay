@@ -25,19 +25,11 @@ type Relay struct {
 func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 
 	// supportedNIPs := []any{9, 11, 12, 15, 16, 20, 33}
-	supportedNIPs := []any{9, 11}
+	supportedNIPs := []any{9, 11, 45, 65}
 	// TODO: Implement the NIP42
 	/*
 		if _, ok := s.relay.(Auther); ok {
 			supportedNIPs = append(supportedNIPs, 42)
-		}
-	*/
-	// TODO: Implement the NIP45
-	/*
-		if storage, ok := s.relay.(eventstore.Store); ok && storage != nil {
-			if _, ok = storage.(EventCounter); ok {
-				supportedNIPs = append(supportedNIPs, 45)
-			}
 		}
 	*/
 
@@ -85,6 +77,8 @@ func (relay *Relay) HandleMessage(ctx context.Context, ws *webSocket.WebSocket, 
 	switch typ {
 	case "EVENT":
 		handler = handlers.EventHandler{Ctx: ctx, Ws: ws, Req: request}
+	case "COUNT":
+		handler = handlers.CountHandler{Ctx: ctx, Ws: ws, Req: request}
 	case "REQ":
 		handler = handlers.RequestHandler{Ctx: ctx, Ws: ws, Req: request}
 	case "CLOSE":
