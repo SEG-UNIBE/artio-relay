@@ -22,10 +22,11 @@ type Configuration struct {
 	relayPort    string
 	relayName    string
 
-	RelayWriteWait      time.Duration
-	RelayPongWait       time.Duration
-	RelayPingWait       time.Duration
-	RelayMaxMessageSize int64
+	RelayWriteWait       time.Duration
+	RelayPongWait        time.Duration
+	RelayPingWait        time.Duration
+	RelayMaxMessageSize  int64
+	RelayMaxMessageCount int
 
 	NIP11Software    string
 	NIP11Description string
@@ -58,6 +59,8 @@ func (conf *Configuration) Init(envFile string) (*Configuration, error) {
 	conf.RelayPongWait = 60 * time.Second
 	conf.RelayPingWait = conf.RelayPongWait / 2
 	conf.RelayMaxMessageSize, _ = strconv.ParseInt(os.Getenv("RELAY_MAX_MESSAGE_SIZE"), 10, 64)
+	var x, _ = strconv.ParseInt(os.Getenv("RELAY_MAX_MESSAGE_COUNT"), 10, 32)
+	conf.RelayMaxMessageCount = int(x)
 
 	conf.NIP11Software = os.Getenv("NIP11_SOFTWARE")
 	conf.NIP11Description = os.Getenv("NIP11_DESCRIPTION")
