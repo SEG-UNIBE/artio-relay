@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"artio-relay/pkg/config"
 	"artio-relay/pkg/storage/handlers"
 	"artio-relay/pkg/storage/models"
 	"github.com/nbd-wtf/go-nostr"
@@ -36,8 +37,9 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	// TODO implement the adapter functionality
 	// should translate nostr.filter into a gorm understandable model
 
-	if filter.Limit == 0 {
+	if filter.Limit == 0 || filter.Limit > config.Config.RelayMaxMessageCount {
 		// query only for the limited amount of events (order by time)
+		filter.Limit = config.Config.RelayMaxMessageCount
 	}
 
 	var events []nostr.Event
