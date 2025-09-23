@@ -4,10 +4,11 @@ import (
 	"artio-relay/pkg/config"
 	"artio-relay/pkg/storage/handlers"
 	"artio-relay/pkg/storage/models"
-	"github.com/nbd-wtf/go-nostr"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/nbd-wtf/go-nostr"
 )
 
 type EventAdapter struct {
@@ -83,14 +84,13 @@ Delete handles the deletion request
 */
 func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 	deleteAllowed := true
+	var filter nostr.Filter
 	for _, tag := range event.Tags {
 		// loop over all the tags
-		var filter nostr.Filter
 		if tag[0] == "e" {
 			// delete by event id
 			// only fetch the ones from database that we are actually allowed to delete
-			filter = nostr.Filter{IDs: []string{tag[1]}}
-
+			filter = nostr.Filter{Authors: []string{event.PubKey}, IDs: []string{tag[1]}}
 		} else if tag[0] == "a" {
 			values := tag[1]
 			valueList := strings.Split(values, ":")
@@ -108,8 +108,9 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 				tagMap := nostr.TagMap{"d": []string{dIdentifier}}
 				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Tags: tagMap, Since: &event.CreatedAt}
 			}
+		} else {
+			continue
 		}
-
 		// take the predefined filter and start the fetching and deletion process
 		result, err := handlers.EventHandlerObject.GetEvents(filter)
 
