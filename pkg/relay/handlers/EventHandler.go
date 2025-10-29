@@ -6,8 +6,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/nbd-wtf/go-nostr"
 	"log"
+
+	"github.com/nbd-wtf/go-nostr"
 )
 
 /*
@@ -65,6 +66,15 @@ func (e EventHandler) Handle() string {
 			return ""
 		}
 		_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: true, Reason: ""})
+		return ""
+	} else if evt.Kind == 3 {
+		// we have a follow list event
+		err := eventAdapter.DeleteAndInsertKind3(evt)
+		if err != nil {
+			log.Printf("Error occured %v", err)
+			_ = e.Ws.WriteJSON(nostr.OKEnvelope{EventID: evt.ID, OK: false, Reason: "error while processing the delete request"})
+			return ""
+		}
 		return ""
 	}
 

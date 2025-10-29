@@ -137,3 +137,21 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 	return nil, deleteAllowed
 
 }
+
+/*
+DeleteAndInsertKind3 handles all Kind 3 events for NIP-02. delete all follow lists for the given pubkey and create new one.
+*/
+func (e *EventAdapter) DeleteAndInsertKind3(event nostr.Event) error {
+	pubkey := event.PubKey
+	filter := nostr.Filter{Kinds: []int{3}, Authors: []string{pubkey}}
+	var irResults, err = handlers.EventHandlerObject.GetEvents(filter)
+	if err != nil {
+		return err
+	}
+	err = handlers.EventHandlerObject.DeleteEvents(irResults)
+	if err != nil {
+		return err
+	}
+	_, err = e.Create(event)
+	return err
+}

@@ -26,7 +26,7 @@ type Relay struct {
 func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 
 	// supportedNIPs := []any{9, 11, 12, 15, 16, 20, 33}
-	supportedNIPs := []any{9, 11, 45, 50, 65}
+	supportedNIPs := []any{1, 2, 9, 11, 45, 50, 65}
 	// TODO: Implement the NIP42
 	/*
 		if _, ok := s.relay.(Auther); ok {
