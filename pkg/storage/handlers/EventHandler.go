@@ -47,6 +47,10 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 		transaction = transaction.Where(map[string]interface{}{"kind": filter.Kinds})
 	}
 
+	if filter.Search != "" {
+		transaction = transaction.Where("Content LIKE '%?%'", filter.Search)
+	}
+
 	if filter.Limit != 0 {
 		transaction = transaction.Limit(filter.Limit)
 	}

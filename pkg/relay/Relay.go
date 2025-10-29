@@ -8,8 +8,9 @@ import (
 	"artio-relay/pkg/webSocket"
 	"context"
 	"encoding/json"
-	"github.com/nbd-wtf/go-nostr/nip11"
 	"log"
+
+	"github.com/nbd-wtf/go-nostr/nip11"
 )
 
 type IRelay interface {
@@ -25,7 +26,7 @@ type Relay struct {
 func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 
 	// supportedNIPs := []any{9, 11, 12, 15, 16, 20, 33}
-	supportedNIPs := []any{9, 11, 45, 65}
+	supportedNIPs := []any{9, 11, 45, 50, 65}
 	// TODO: Implement the NIP42
 	/*
 		if _, ok := s.relay.(Auther); ok {
