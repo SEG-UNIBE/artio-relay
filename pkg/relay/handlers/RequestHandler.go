@@ -1,20 +1,23 @@
 package handlers
 
 import (
-	"artio-relay/pkg/storage/adapter"
-	"artio-relay/pkg/webSocket"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/nbd-wtf/go-nostr"
 	"log"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
+
+	"github.com/nbd-wtf/go-nostr"
 )
 
 /*
 RequestHandler handles messages of type REQ
 */
 type RequestHandler struct {
-	Ctx context.Context
+	Ctx *context.Context
 	Ws  *webSocket.WebSocket
 	Req []json.RawMessage
 }
@@ -24,13 +27,17 @@ Handle handles the functionality for this event
 */
 func (r RequestHandler) Handle() string {
 	var id string
-	json.Unmarshal(r.Req[1], &id)
+	err := json.Unmarshal(r.Req[1], &id)
+	if err != nil {
+		return "failed to decode request: " + err.Error()
+	}
 	if id == "" {
 		return "REQ has no <id>"
 	}
 
 	filters := make(nostr.Filters, len(r.Req)-2)
 	for i, filterReq := range r.Req[2:] {
+		filters[i].Limit = config.Config.RelayMaxMessageCount
 		if err := json.Unmarshal(
 			filterReq,
 			&filters[i],

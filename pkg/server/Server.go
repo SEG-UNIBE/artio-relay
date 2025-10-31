@@ -1,39 +1,25 @@
 package server
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/logging"
-	"artio-relay/pkg/relay"
-	"artio-relay/pkg/storage/adapter"
-	"artio-relay/pkg/webSocket"
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/fasthttp/websocket"
-	"github.com/rs/cors"
 	"log"
 	"net"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/logging"
+	"github.com/SEG-UNIBE/artio-relay/pkg/relay"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
+
+	"github.com/fasthttp/websocket"
+	"github.com/rs/cors"
 )
-
-/*
-challenge creating a websocket with a cryptographic challenge
-*/
-func challenge(conn *websocket.Conn) *webSocket.WebSocket {
-	// NIP-42 challenge
-	challenge := make([]byte, 8)
-	rand.Read(challenge)
-
-	return &webSocket.WebSocket{
-		Conn:      conn,
-		Challenge: hex.EncodeToString(challenge),
-	}
-}
 
 /*
 IServer to specify the Server functionalities
@@ -64,7 +50,7 @@ type Server struct {
 }
 
 /*
-Start is the function to startup the server and handle then delegate the handling of the traffic
+Start is the function to start up the server and handle then delegate the handling of the traffic
 */
 func (s *Server) Start() error {
 	addr := config.Config.GetRelayAddress()
@@ -134,7 +120,7 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	}
 	go logging.ArtioLogger.LogConnect(ip)
 
-	ws := challenge(conn)
+	ws := s.relay.Challenge(conn)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// reader
@@ -146,7 +132,6 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 			if _, ok := s.clients[conn]; ok {
 				_ = conn.Close()
 				delete(s.clients, conn)
-				//removeListener(ws)
 			}
 			s.clientsMu.Unlock()
 			go logging.ArtioLogger.LogDisconnect(ip)
@@ -161,10 +146,7 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 		})
 		defer cancel()
 
-		// NIP-42 auth challenge
-		//if _, ok := s.relay.(Auther); ok {
-		//	ws.WriteJSON(nostr.AuthEnvelope{Challenge: &ws.challenge})
-		//}
+		s.relay.SendAuthMessage(ws)
 
 		for {
 			typ, message, err := conn.ReadMessage()
@@ -191,7 +173,7 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			go s.relay.HandleMessage(ctx, ws, message)
+			go s.relay.HandleMessage(&ctx, ws, message)
 		}
 	}()
 

@@ -1,26 +1,11 @@
 package server
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/relay"
-	"reflect"
 	"testing"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/relay"
 )
-
-/*
-TestServerChallenge tests if the return value of the server challenge is of valid type
-*/
-func TestServerChallenge(t *testing.T) {
-	socket := challenge(nil)
-
-	if socket.Conn != nil {
-		t.Fatalf("the socket connection is not nil: %v", socket.Conn)
-	}
-
-	if reflect.TypeOf(socket.Challenge).Kind() != reflect.String {
-		t.Fatalf("challenge is not a string: %v", reflect.TypeOf(socket.Challenge))
-	}
-}
 
 func funcTestServerSetup(t *testing.T) {
 	server := NewServer(&relay.Relay{})

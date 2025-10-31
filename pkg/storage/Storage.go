@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/storage/models"
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

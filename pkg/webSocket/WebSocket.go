@@ -1,9 +1,10 @@
 package webSocket
 
 import (
+	"sync"
+
 	"github.com/fasthttp/websocket"
 	"golang.org/x/time/rate"
-	"sync"
 )
 
 /*
@@ -14,13 +15,14 @@ type WebSocket struct {
 	mutex sync.Mutex
 
 	// nip42
-	Challenge string
-	authed    string
-	limiter   *rate.Limiter
+	Challenge     string
+	Authenticated string
+	ServiceURL    string
+	limiter       *rate.Limiter
 }
 
 /*
-WriteJSON writes a output JSON to the websocket with mutual exclusion activated.
+WriteJSON writes an output JSON to the websocket with mutual exclusion activated.
 */
 func (ws *WebSocket) WriteJSON(any interface{}) error {
 	ws.mutex.Lock()
@@ -29,7 +31,7 @@ func (ws *WebSocket) WriteJSON(any interface{}) error {
 }
 
 /*
-WriteMessage writes a output to the websocket with mutual exclusion activated.
+WriteMessage writes an output to the websocket with mutual exclusion activated.
 */
 func (ws *WebSocket) WriteMessage(t int, b []byte) error {
 	ws.mutex.Lock()

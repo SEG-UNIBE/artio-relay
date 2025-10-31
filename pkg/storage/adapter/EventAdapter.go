@@ -1,13 +1,15 @@
 package adapter
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/storage/handlers"
-	"artio-relay/pkg/storage/models"
-	"github.com/nbd-wtf/go-nostr"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/handlers"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/models"
+
+	"github.com/nbd-wtf/go-nostr"
 )
 
 type EventAdapter struct {
@@ -37,7 +39,7 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	// TODO implement the adapter functionality
 	// should translate nostr.filter into a gorm understandable model
 
-	if filter.Limit == 0 || filter.Limit > config.Config.RelayMaxMessageCount {
+	if filter.Limit > config.Config.RelayMaxMessageCount {
 		// query only for the limited amount of events (order by time)
 		filter.Limit = config.Config.RelayMaxMessageCount
 	}
@@ -48,10 +50,6 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 
 	if err != nil {
 		return nil, err
-	}
-
-	if filter.Limit == 0 {
-		filter.Limit = 999999
 	}
 
 	for _, result := range irResults {
@@ -83,14 +81,13 @@ Delete handles the deletion request
 */
 func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 	deleteAllowed := true
+	var filter nostr.Filter
 	for _, tag := range event.Tags {
 		// loop over all the tags
-		var filter nostr.Filter
 		if tag[0] == "e" {
 			// delete by event id
 			// only fetch the ones from database that we are actually allowed to delete
-			filter = nostr.Filter{IDs: []string{tag[1]}}
-
+			filter = nostr.Filter{Authors: []string{event.PubKey}, IDs: []string{tag[1]}}
 		} else if tag[0] == "a" {
 			values := tag[1]
 			valueList := strings.Split(values, ":")
@@ -108,8 +105,9 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 				tagMap := nostr.TagMap{"d": []string{dIdentifier}}
 				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Tags: tagMap, Since: &event.CreatedAt}
 			}
+		} else {
+			continue
 		}
-
 		// take the predefined filter and start the fetching and deletion process
 		result, err := handlers.EventHandlerObject.GetEvents(filter)
 
@@ -135,4 +133,22 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 	}
 	return nil, deleteAllowed
 
+}
+
+/*
+DeleteAndInsertKind3 handles all Kind 3 events for NIP-02. delete all follow lists for the given pubkey and create new one.
+*/
+func (e *EventAdapter) DeleteAndInsertKind3(event nostr.Event) error {
+	pubkey := event.PubKey
+	filter := nostr.Filter{Kinds: []int{3}, Authors: []string{pubkey}}
+	var irResults, err = handlers.EventHandlerObject.GetEvents(filter)
+	if err != nil {
+		return err
+	}
+	err = handlers.EventHandlerObject.DeleteEvents(irResults)
+	if err != nil {
+		return err
+	}
+	_, err = e.Create(event)
+	return err
 }

@@ -1,10 +1,12 @@
 package handlers
 
 import (
-	"artio-relay/pkg/storage/models"
 	"fmt"
-	"github.com/nbd-wtf/go-nostr"
 	"slices"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/models"
+
+	"github.com/nbd-wtf/go-nostr"
 )
 
 type EventHandler struct {
@@ -47,9 +49,11 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 		transaction = transaction.Where(map[string]interface{}{"kind": filter.Kinds})
 	}
 
-	if filter.Limit != 0 {
-		transaction = transaction.Limit(filter.Limit)
+	if filter.Search != "" {
+		transaction = transaction.Where("Content LIKE ?", fmt.Sprintf("%%%s%%", filter.Search))
 	}
+
+	transaction = transaction.Limit(filter.Limit)
 
 	// order the end result
 	transaction.Order("Created desc")
@@ -106,7 +110,6 @@ DeleteEvents Handles the deletion of Events
 */
 func (e EventHandler) DeleteEvents(events []models.Event) error {
 	e.Connection.Table("events")
-	fmt.Println(events)
 	res := e.Connection.Delete(events)
 	return res.Error
 }

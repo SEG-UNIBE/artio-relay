@@ -1,10 +1,13 @@
 package handlers
 
 import (
-	"artio-relay/pkg/storage/adapter"
-	"artio-relay/pkg/webSocket"
 	"encoding/json"
 	"fmt"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
+
 	"github.com/nbd-wtf/go-nostr"
 )
 
@@ -30,6 +33,7 @@ func (c CountHandler) Handle() string {
 
 	filters := make(nostr.Filters, len(c.Req)-2)
 	for i, filterReq := range c.Req[2:] {
+		filters[i].Limit = config.Config.RelayMaxMessageCount
 		if err := json.Unmarshal(
 			filterReq,
 			&filters[i],

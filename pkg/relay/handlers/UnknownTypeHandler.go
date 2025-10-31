@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"artio-relay/pkg/webSocket"
 	"encoding/json"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 )
 
 /*

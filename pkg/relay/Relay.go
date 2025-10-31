@@ -1,20 +1,27 @@
 package relay
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/logging"
-	"artio-relay/pkg/relay/handlers"
-	"artio-relay/pkg/storage"
-	"artio-relay/pkg/webSocket"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
-	"github.com/nbd-wtf/go-nostr/nip11"
 	"log"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/logging"
+	"github.com/SEG-UNIBE/artio-relay/pkg/relay/handlers"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
+
+	"github.com/fasthttp/websocket"
+	"github.com/nbd-wtf/go-nostr"
+	"github.com/nbd-wtf/go-nostr/nip11"
 )
 
 type IRelay interface {
 	GetNIP11Information() nip11.RelayInformationDocument
 	HandleMessage(ctx any, ws *webSocket.WebSocket, message []byte)
+	ServiceURL() string
 }
 
 type Relay struct {
@@ -22,16 +29,15 @@ type Relay struct {
 	Name    string
 }
 
-func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
+func (relay *Relay) ServiceURL() string {
+	return config.Config.RelayServiceURL
+}
 
-	// supportedNIPs := []any{9, 11, 12, 15, 16, 20, 33}
-	supportedNIPs := []any{9, 11, 45, 65}
-	// TODO: Implement the NIP42
-	/*
-		if _, ok := s.relay.(Auther); ok {
-			supportedNIPs = append(supportedNIPs, 42)
-		}
-	*/
+func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
+	supportedNIPs := []any{1, 2, 9, 11, 45, 50, 65}
+	if config.Config.SupportNIP42 {
+		supportedNIPs = append(supportedNIPs, 42)
+	}
 
 	return nip11.RelayInformationDocument{
 		Name:          relay.Name,
@@ -46,7 +52,28 @@ func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 	}
 }
 
-func (relay *Relay) HandleMessage(ctx context.Context, ws *webSocket.WebSocket, message []byte) {
+/*
+Challenge creating a websocket with a cryptographic challenge
+*/
+func (relay *Relay) Challenge(conn *websocket.Conn) *webSocket.WebSocket {
+	// NIP-42 challenge
+	challenge := make([]byte, 8)
+	_, _ = rand.Read(challenge)
+
+	return &webSocket.WebSocket{
+		Conn:       conn,
+		Challenge:  hex.EncodeToString(challenge),
+		ServiceURL: relay.ServiceURL(),
+	}
+}
+
+func (relay *Relay) SendAuthMessage(ws *webSocket.WebSocket) {
+	if config.Config.SupportNIP42 {
+		_ = ws.WriteJSON(nostr.AuthEnvelope{Challenge: &ws.Challenge})
+	}
+}
+
+func (relay *Relay) HandleMessage(ctx *context.Context, ws *webSocket.WebSocket, message []byte) {
 	var notice string
 	// function gets executed after the rest of the function is done.
 	defer func() {
@@ -76,13 +103,16 @@ func (relay *Relay) HandleMessage(ctx context.Context, ws *webSocket.WebSocket, 
 	logging.ArtioLogger.LogHandling("RELAYHANDLE", typ, ws.GetRemoteIP())
 	switch typ {
 	case "EVENT":
-		handler = handlers.EventHandler{Ctx: ctx, Ws: ws, Req: request}
+		handler = &handlers.EventHandler{Ctx: ctx, Ws: ws, Req: request}
 	case "COUNT":
-		handler = handlers.CountHandler{Ctx: ctx, Ws: ws, Req: request}
+		handler = &handlers.CountHandler{Ctx: ctx, Ws: ws, Req: request}
 	case "REQ":
-		handler = handlers.RequestHandler{Ctx: ctx, Ws: ws, Req: request}
+		handler = &handlers.RequestHandler{Ctx: ctx, Ws: ws, Req: request}
 	case "CLOSE":
-		handler = handlers.CloseHandler{Ctx: ctx, Ws: ws, Req: request}
+		handler = &handlers.CloseHandler{Ctx: ctx, Ws: ws, Req: request}
+	case "AUTH":
+		handler = &handlers.AuthenticationHandler{Ctx: ctx, Ws: ws, Req: request}
+
 	default:
 		handler = handlers.UnknownTypeHandler{Ctx: ctx, Ws: ws, Req: request}
 	}

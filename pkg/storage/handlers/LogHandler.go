@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"artio-relay/pkg/storage/models"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/models"
 )
 
 type LogHandler struct {
