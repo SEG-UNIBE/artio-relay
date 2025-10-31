@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"artio-relay/pkg/storage/models"
+	"fmt"
 	"slices"
 
 	"github.com/nbd-wtf/go-nostr"
@@ -48,7 +49,7 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 	}
 
 	if filter.Search != "" {
-		transaction = transaction.Where("Content LIKE '%?%'", filter.Search)
+		transaction = transaction.Where("Content LIKE ?", fmt.Sprintf("%%%s%%", filter.Search))
 	}
 
 	if filter.Limit != 0 {
