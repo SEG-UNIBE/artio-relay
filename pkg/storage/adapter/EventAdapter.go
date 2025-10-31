@@ -1,12 +1,13 @@
 package adapter
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/storage/handlers"
-	"artio-relay/pkg/storage/models"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/handlers"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/models"
 
 	"github.com/nbd-wtf/go-nostr"
 )

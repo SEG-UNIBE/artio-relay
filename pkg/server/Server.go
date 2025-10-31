@@ -1,11 +1,6 @@
 package server
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/logging"
-	"artio-relay/pkg/relay"
-	"artio-relay/pkg/storage/adapter"
-	"artio-relay/pkg/webSocket"
 	"context"
 	"encoding/json"
 	"errors"
@@ -15,6 +10,12 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/logging"
+	"github.com/SEG-UNIBE/artio-relay/pkg/relay"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 
 	"github.com/fasthttp/websocket"
 	"github.com/rs/cors"
@@ -49,7 +50,7 @@ type Server struct {
 }
 
 /*
-Start is the function to startup the server and handle then delegate the handling of the traffic
+Start is the function to start up the server and handle then delegate the handling of the traffic
 */
 func (s *Server) Start() error {
 	addr := config.Config.GetRelayAddress()

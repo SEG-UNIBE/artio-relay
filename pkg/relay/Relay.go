@@ -1,16 +1,17 @@
 package relay
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/logging"
-	"artio-relay/pkg/relay/handlers"
-	"artio-relay/pkg/storage"
-	"artio-relay/pkg/webSocket"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"log"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/logging"
+	"github.com/SEG-UNIBE/artio-relay/pkg/relay/handlers"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 
 	"github.com/fasthttp/websocket"
 	"github.com/nbd-wtf/go-nostr"

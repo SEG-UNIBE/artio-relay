@@ -1,8 +1,9 @@
 package webSocket
 
 import (
-	"github.com/fasthttp/websocket"
 	"net/http"
+
+	"github.com/fasthttp/websocket"
 )
 
 /*

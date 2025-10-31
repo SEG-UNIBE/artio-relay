@@ -1,9 +1,10 @@
 package server
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/relay"
 	"testing"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/relay"
 )
 
 func funcTestServerSetup(t *testing.T) {

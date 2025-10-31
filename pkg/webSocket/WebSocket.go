@@ -22,7 +22,7 @@ type WebSocket struct {
 }
 
 /*
-WriteJSON writes a output JSON to the websocket with mutual exclusion activated.
+WriteJSON writes an output JSON to the websocket with mutual exclusion activated.
 */
 func (ws *WebSocket) WriteJSON(any interface{}) error {
 	ws.mutex.Lock()
@@ -31,7 +31,7 @@ func (ws *WebSocket) WriteJSON(any interface{}) error {
 }
 
 /*
-WriteMessage writes a output to the websocket with mutual exclusion activated.
+WriteMessage writes an output to the websocket with mutual exclusion activated.
 */
 func (ws *WebSocket) WriteMessage(t int, b []byte) error {
 	ws.mutex.Lock()

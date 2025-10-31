@@ -1,10 +1,11 @@
 package main
 
 import (
-	"artio-relay/pkg/relay"
-	"artio-relay/pkg/server"
-	"artio-relay/pkg/storage"
 	"log"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/relay"
+	"github.com/SEG-UNIBE/artio-relay/pkg/server"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage"
 )
 
 /*

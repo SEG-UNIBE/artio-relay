@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/storage/adapter"
-	"artio-relay/pkg/webSocket"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 
 	"github.com/nbd-wtf/go-nostr"
 )
@@ -26,7 +27,10 @@ Handle handles the functionality for this event
 */
 func (r RequestHandler) Handle() string {
 	var id string
-	json.Unmarshal(r.Req[1], &id)
+	err := json.Unmarshal(r.Req[1], &id)
+	if err != nil {
+		return "failed to decode request: " + err.Error()
+	}
 	if id == "" {
 		return "REQ has no <id>"
 	}

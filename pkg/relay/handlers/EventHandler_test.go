@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/nbd-wtf/go-nostr"
 	"testing"
+
+	"github.com/nbd-wtf/go-nostr"
 )
 
 /*

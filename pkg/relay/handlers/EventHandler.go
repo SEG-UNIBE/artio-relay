@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"artio-relay/pkg/storage/adapter"
-	"artio-relay/pkg/webSocket"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"log"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 
 	"github.com/nbd-wtf/go-nostr"
 )

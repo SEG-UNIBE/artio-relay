@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"artio-relay/pkg/storage/models"
 	"fmt"
 	"slices"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/models"
 
 	"github.com/nbd-wtf/go-nostr"
 )

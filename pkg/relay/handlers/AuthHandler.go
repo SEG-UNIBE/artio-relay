@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"artio-relay/pkg/config"
-	"artio-relay/pkg/webSocket"
 	"context"
 	"encoding/json"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/config"
+	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip42"

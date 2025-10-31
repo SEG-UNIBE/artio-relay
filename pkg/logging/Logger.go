@@ -1,10 +1,11 @@
 package logging
 
 import (
-	"artio-relay/pkg/storage/adapter"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
 )
 
 type Logger struct {
@@ -57,7 +58,7 @@ func (l *Logger) LogNIP11(ip string) {
 }
 
 func (l *Logger) LogRequest(typ string, content string, ip string) {
-	fmt.Println("message:", string(content))
+	fmt.Println("message:", content)
 	_, _ = l.LogAdapter.Create(ip, typ, content)
 }
 

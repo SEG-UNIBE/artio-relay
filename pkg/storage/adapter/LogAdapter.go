@@ -1,8 +1,8 @@
 package adapter
 
 import (
-	"artio-relay/pkg/storage/handlers"
-	"artio-relay/pkg/storage/models"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/handlers"
+	"github.com/SEG-UNIBE/artio-relay/pkg/storage/models"
 )
 
 type LogAdapter struct {
