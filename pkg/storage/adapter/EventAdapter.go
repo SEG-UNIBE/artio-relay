@@ -38,7 +38,7 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 	// TODO implement the adapter functionality
 	// should translate nostr.filter into a gorm understandable model
 
-	if filter.Limit == 0 || filter.Limit > config.Config.RelayMaxMessageCount {
+	if filter.Limit > config.Config.RelayMaxMessageCount {
 		// query only for the limited amount of events (order by time)
 		filter.Limit = config.Config.RelayMaxMessageCount
 	}
@@ -49,10 +49,6 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 
 	if err != nil {
 		return nil, err
-	}
-
-	if filter.Limit == 0 {
-		filter.Limit = 999999
 	}
 
 	for _, result := range irResults {

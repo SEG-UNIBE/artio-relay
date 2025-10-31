@@ -52,9 +52,7 @@ func (e EventHandler) GetEvents(filter nostr.Filter) ([]models.Event, error) {
 		transaction = transaction.Where("Content LIKE ?", fmt.Sprintf("%%%s%%", filter.Search))
 	}
 
-	if filter.Limit != 0 {
-		transaction = transaction.Limit(filter.Limit)
-	}
+	transaction = transaction.Limit(filter.Limit)
 
 	// order the end result
 	transaction.Order("Created desc")

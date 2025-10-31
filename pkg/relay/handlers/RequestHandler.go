@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"artio-relay/pkg/config"
 	"artio-relay/pkg/storage/adapter"
 	"artio-relay/pkg/webSocket"
 	"context"
@@ -32,6 +33,7 @@ func (r RequestHandler) Handle() string {
 
 	filters := make(nostr.Filters, len(r.Req)-2)
 	for i, filterReq := range r.Req[2:] {
+		filters[i].Limit = config.Config.RelayMaxMessageCount
 		if err := json.Unmarshal(
 			filterReq,
 			&filters[i],
