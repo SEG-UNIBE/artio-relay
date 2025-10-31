@@ -6,15 +6,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/nbd-wtf/go-nostr"
 	"log"
+
+	"github.com/nbd-wtf/go-nostr"
 )
 
 /*
 RequestHandler handles messages of type REQ
 */
 type RequestHandler struct {
-	Ctx context.Context
+	Ctx *context.Context
 	Ws  *webSocket.WebSocket
 	Req []json.RawMessage
 }

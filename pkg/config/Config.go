@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 /*
@@ -27,6 +28,9 @@ type Configuration struct {
 	RelayPingWait        time.Duration
 	RelayMaxMessageSize  int64
 	RelayMaxMessageCount int
+
+	SupportNIP42    bool
+	RelayServiceURL string
 
 	NIP11Software    string
 	NIP11Description string
@@ -61,6 +65,9 @@ func (conf *Configuration) Init(envFile string) (*Configuration, error) {
 	conf.RelayMaxMessageSize, _ = strconv.ParseInt(os.Getenv("RELAY_MAX_MESSAGE_SIZE"), 10, 64)
 	var x, _ = strconv.ParseInt(os.Getenv("RELAY_MAX_MESSAGE_COUNT"), 10, 32)
 	conf.RelayMaxMessageCount = int(x)
+
+	conf.SupportNIP42, _ = strconv.ParseBool(os.Getenv("RELAY_SUPPORT_NIP_42"))
+	conf.RelayServiceURL = os.Getenv("RELAY_SERVICE_URL")
 
 	conf.NIP11Software = os.Getenv("NIP11_SOFTWARE")
 	conf.NIP11Description = os.Getenv("NIP11_DESCRIPTION")

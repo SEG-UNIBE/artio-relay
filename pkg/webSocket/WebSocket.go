@@ -1,9 +1,10 @@
 package webSocket
 
 import (
+	"sync"
+
 	"github.com/fasthttp/websocket"
 	"golang.org/x/time/rate"
-	"sync"
 )
 
 /*
@@ -14,9 +15,10 @@ type WebSocket struct {
 	mutex sync.Mutex
 
 	// nip42
-	Challenge string
-	authed    string
-	limiter   *rate.Limiter
+	Challenge     string
+	Authenticated string
+	ServiceURL    string
+	limiter       *rate.Limiter
 }
 
 /*
