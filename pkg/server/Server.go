@@ -14,9 +14,11 @@ import (
 	"github.com/SEG-UNIBE/artio-relay/pkg/config"
 	"github.com/SEG-UNIBE/artio-relay/pkg/logging"
 	"github.com/SEG-UNIBE/artio-relay/pkg/relay"
+	"github.com/SEG-UNIBE/artio-relay/pkg/stats"
 	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
 	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 	"github.com/fasthttp/websocket"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 )
 
@@ -56,6 +58,7 @@ func (s *Server) Start() error {
 	if s.serveMux == nil {
 		s.serveMux = http.NewServeMux()
 	}
+	s.InjectHandler("/metrics", promhttp.Handler())
 
 	addr := config.Config.GetRelayAddress()
 	ln, err := net.Listen("tcp", addr)
@@ -87,6 +90,7 @@ ServeHTTP implements http.Handler interface.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("Accept") == "application/nostr+json" {
+		go stats.Nip11Handled()
 		w.Header().Set("Content-Type", "application/json")
 		info := s.relay.GetNIP11Information()
 
@@ -94,6 +98,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		go logging.ArtioLogger.LogNIP11(r.RemoteAddr)
 
 	} else if r.Header.Get("Upgrade") == "websocket" {
+		go stats.WebSocketUpgraded()
 		s.HandleWebsocket(w, r)
 	} else {
 		s.serveMux.ServeHTTP(w, r)

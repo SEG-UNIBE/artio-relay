@@ -3,6 +3,7 @@ package webSocket
 import (
 	"sync"
 
+	"github.com/SEG-UNIBE/artio-relay/pkg/stats"
 	"github.com/fasthttp/websocket"
 	"golang.org/x/time/rate"
 )
@@ -25,6 +26,7 @@ type WebSocket struct {
 WriteJSON writes an output JSON to the websocket with mutual exclusion activated.
 */
 func (ws *WebSocket) WriteJSON(any interface{}) error {
+	go stats.MessageOut()
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 	return ws.Conn.WriteJSON(any)
