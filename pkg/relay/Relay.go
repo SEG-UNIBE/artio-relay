@@ -10,6 +10,7 @@ import (
 	"github.com/SEG-UNIBE/artio-relay/pkg/config"
 	"github.com/SEG-UNIBE/artio-relay/pkg/logging"
 	"github.com/SEG-UNIBE/artio-relay/pkg/relay/handlers"
+	"github.com/SEG-UNIBE/artio-relay/pkg/stats"
 	"github.com/SEG-UNIBE/artio-relay/pkg/storage"
 	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
 
@@ -98,6 +99,7 @@ func (relay *Relay) HandleMessage(ctx *context.Context, ws *webSocket.WebSocket,
 
 	var typ string
 	_ = json.Unmarshal(request[0], &typ)
+	go stats.MessageIn(typ)
 
 	var handler handlers.Handler
 	logging.ArtioLogger.LogHandling("RELAYHANDLE", typ, ws.GetRemoteIP())

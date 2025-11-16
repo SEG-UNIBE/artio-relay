@@ -14,10 +14,11 @@ import (
 	"github.com/SEG-UNIBE/artio-relay/pkg/config"
 	"github.com/SEG-UNIBE/artio-relay/pkg/logging"
 	"github.com/SEG-UNIBE/artio-relay/pkg/relay"
+	"github.com/SEG-UNIBE/artio-relay/pkg/stats"
 	"github.com/SEG-UNIBE/artio-relay/pkg/storage/adapter"
 	"github.com/SEG-UNIBE/artio-relay/pkg/webSocket"
-
 	"github.com/fasthttp/websocket"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 )
 
@@ -53,6 +54,12 @@ type Server struct {
 Start is the function to start up the server and handle then delegate the handling of the traffic
 */
 func (s *Server) Start() error {
+	// create the serveMux if not already done
+	if s.serveMux == nil {
+		s.serveMux = http.NewServeMux()
+	}
+	s.InjectHandler("/metrics", promhttp.Handler())
+
 	addr := config.Config.GetRelayAddress()
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -83,6 +90,7 @@ ServeHTTP implements http.Handler interface.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("Accept") == "application/nostr+json" {
+		go stats.Nip11Handled()
 		w.Header().Set("Content-Type", "application/json")
 		info := s.relay.GetNIP11Information()
 
@@ -90,6 +98,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		go logging.ArtioLogger.LogNIP11(r.RemoteAddr)
 
 	} else if r.Header.Get("Upgrade") == "websocket" {
+		go stats.WebSocketUpgraded()
 		s.HandleWebsocket(w, r)
 	} else {
 		s.serveMux.ServeHTTP(w, r)
@@ -201,6 +210,18 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	}()
 }
 
+/*
+InjectHandler allows to inject custom http.Handlers into the server on a given path
+this will panic if the pattern is already registered
+*/
+func (s *Server) InjectHandler(pattern string, handler http.Handler) {
+	s.serveMux.Handle(pattern, handler)
+}
+
 func NewServer(relay *relay.Relay) *Server {
-	return &Server{relay: relay, upgrader: webSocket.NewUpgrader(), LogAdapter: adapter.LogAdapter{}}
+	return &Server{
+		relay:      relay,
+		upgrader:   webSocket.NewUpgrader(),
+		LogAdapter: adapter.LogAdapter{},
+		serveMux:   http.NewServeMux()}
 }
