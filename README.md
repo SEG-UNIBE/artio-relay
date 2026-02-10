@@ -1,4 +1,11 @@
 # artio Relay
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GoDoc](https://godoc.org/github.com/SEG-UNIBE/artio-relay?status.svg)](https://pkg.go.dev/github.com/SEG-UNIBE/artio-relay)
+[![Go Report Card](https://goreportcard.com/badge/github.com/SEG-UNIBE/artio-relay)](https://goreportcard.com/report/github.com/SEG-UNIBE/artio-relay)
+[![GitHub release](https://img.shields.io/github/tag/SEG-UNIBE/artio-relay.svg?label=release)](https://github.com/SEG-UNIBE/artio-relay/releases)
+[![GitHub release date](https://img.shields.io/github/release-date/SEG-UNIBE/artio-relay.svg)](https://github.com/SEG-UNIBE/artio-relay/releases)
+
+## Actions
 [![CI](https://github.com/SEG-UNIBE/artio-relay/actions/workflows/docker_build.yml/badge.svg)](https://github.com/SEG-UNIBE/artio-relay/actions/workflows/docker_build.yml)
 [![CI](https://github.com/SEG-UNIBE/artio-relay/actions/workflows/docker_build_publish_development.yml/badge.svg)](https://github.com/SEG-UNIBE/artio-relay/actions/workflows/docker_build_publish_development.yml)
 [![CI](https://github.com/SEG-UNIBE/artio-relay/actions/workflows/docker_build_publish_main.yml/badge.svg)](https://github.com/SEG-UNIBE/artio-relay/actions/workflows/docker_build_publish_main.yml)
