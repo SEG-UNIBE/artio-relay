@@ -61,11 +61,7 @@ func (relay *Relay) Challenge(conn *websocket.Conn) *webSocket.WebSocket {
 	challenge := make([]byte, 8)
 	_, _ = rand.Read(challenge)
 
-	return &webSocket.WebSocket{
-		Conn:       conn,
-		Challenge:  hex.EncodeToString(challenge),
-		ServiceURL: relay.ServiceURL(),
-	}
+	return webSocket.NewWebSocket(conn, hex.EncodeToString(challenge), relay.ServiceURL())
 }
 
 func (relay *Relay) SendAuthMessage(ws *webSocket.WebSocket) {
@@ -75,13 +71,20 @@ func (relay *Relay) SendAuthMessage(ws *webSocket.WebSocket) {
 }
 
 func (relay *Relay) HandleMessage(ctx *context.Context, ws *webSocket.WebSocket, message []byte) {
+	// a malformed message must never take down the whole relay
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("recovered from panic while handling message from %s: %v", ws.GetRemoteIP(), r)
+		}
+	}()
+
 	var notice string
 	// function gets executed after the rest of the function is done.
 	defer func() {
 		if notice != "" {
 			err := ws.WriteJSON(notice)
 			if err != nil {
-				log.Fatalf("error writing JSON: %v", err)
+				log.Printf("error writing JSON: %v", err)
 			}
 		}
 	}()

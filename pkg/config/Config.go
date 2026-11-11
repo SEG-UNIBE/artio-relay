@@ -28,6 +28,8 @@ type Configuration struct {
 	RelayPingWait        time.Duration
 	RelayMaxMessageSize  int64
 	RelayMaxMessageCount int
+	RelayMessageRate     float64
+	RelayMessageBurst    int
 
 	SupportNIP42    bool
 	RelayServiceURL string
@@ -63,6 +65,20 @@ func (conf *Configuration) Init(envFile string) (*Configuration, error) {
 	conf.RelayPongWait = 60 * time.Second
 	conf.RelayPingWait = conf.RelayPongWait / 2
 	conf.RelayMaxMessageSize, _ = strconv.ParseInt(os.Getenv("RELAY_MAX_MESSAGE_SIZE"), 10, 64)
+	if conf.RelayMaxMessageSize <= 0 {
+		// a read limit of 0 means unlimited, so always enforce a sane default
+		conf.RelayMaxMessageSize = 512 * 1024
+	}
+	// messages per second and burst size allowed per connection
+	conf.RelayMessageRate, err = strconv.ParseFloat(os.Getenv("RELAY_MESSAGE_RATE"), 64)
+	if err != nil || conf.RelayMessageRate <= 0 {
+		conf.RelayMessageRate = 20
+	}
+	burst, err := strconv.Atoi(os.Getenv("RELAY_MESSAGE_BURST"))
+	if err != nil || burst <= 0 {
+		burst = 50
+	}
+	conf.RelayMessageBurst = burst
 	var x, _ = strconv.ParseInt(os.Getenv("RELAY_MAX_MESSAGE_COUNT"), 10, 32)
 	conf.RelayMaxMessageCount = int(x)
 

@@ -81,9 +81,12 @@ Delete handles the deletion request
 */
 func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 	deleteAllowed := true
-	var filter nostr.Filter
 	for _, tag := range event.Tags {
-		// loop over all the tags
+		// loop over all the tags, skipping malformed ones
+		if len(tag) < 2 {
+			continue
+		}
+		var filter nostr.Filter
 		if tag[0] == "e" {
 			// delete by event id
 			// only fetch the ones from database that we are actually allowed to delete
@@ -104,6 +107,11 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 				dIdentifier := valueList[2]
 				tagMap := nostr.TagMap{"d": []string{dIdentifier}}
 				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Tags: tagMap, Since: &event.CreatedAt}
+			}
+
+			if len(valueList) != 2 && len(valueList) != 3 {
+				// malformed address, nothing to delete
+				continue
 			}
 		} else {
 			continue
