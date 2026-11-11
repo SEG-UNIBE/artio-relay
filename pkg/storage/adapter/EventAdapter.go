@@ -19,6 +19,10 @@ type EventAdapter struct {
 Create adapts the nostr event to the model in the database and handles the insert.
 */
 func (e *EventAdapter) Create(event nostr.Event) (any, error) {
+	if event.Tags == nil {
+		// the json serializer turns nil into "" for NOT NULL columns, which is invalid jsonb
+		event.Tags = nostr.Tags{}
+	}
 	eventModel := models.Event{
 		EventId: event.ID,
 		Created: event.CreatedAt.Time().Unix(),
@@ -77,10 +81,11 @@ func (e *EventAdapter) Get(filter nostr.Filter) ([]nostr.Event, error) {
 }
 
 /*
-Delete handles the deletion request
+Delete handles the deletion request. Every tag is applied independently, the returned bool is false
+when at least one tag referenced events of another author, which were skipped.
 */
 func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
-	deleteAllowed := true
+	allPermitted := true
 	for _, tag := range event.Tags {
 		// loop over all the tags, skipping malformed ones
 		if len(tag) < 2 {
@@ -92,31 +97,41 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 			// only fetch the ones from database that we are actually allowed to delete
 			filter = nostr.Filter{Authors: []string{event.PubKey}, IDs: []string{tag[1]}}
 		} else if tag[0] == "a" {
-			values := tag[1]
-			valueList := strings.Split(values, ":")
-
-			if len(valueList) == 2 {
-				kind, _ := strconv.ParseInt(valueList[0], 10, 32)
-				pubkey := valueList[1]
-				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Since: &event.CreatedAt}
-			}
-
-			if len(valueList) == 3 {
-				kind, _ := strconv.ParseInt(valueList[0], 10, 32)
-				pubkey := valueList[1]
-				dIdentifier := valueList[2]
-				tagMap := nostr.TagMap{"d": []string{dIdentifier}}
-				filter = nostr.Filter{Authors: []string{pubkey}, Kinds: []int{int(kind)}, Tags: tagMap, Since: &event.CreatedAt}
-			}
-
+			// delete by address "<kind>:<pubkey>:<d-identifier>" (the legacy "<kind>:<pubkey>" form is also accepted)
+			valueList := strings.Split(tag[1], ":")
 			if len(valueList) != 2 && len(valueList) != 3 {
 				// malformed address, nothing to delete
 				continue
+			}
+
+			kind, err := strconv.Atoi(valueList[0])
+			if err != nil {
+				// malformed kind, nothing to delete
+				continue
+			}
+
+			if valueList[1] != event.PubKey {
+				// only the author of an address may delete it, skip it but keep applying the other tags
+				allPermitted = false
+				continue
+			}
+
+			// NIP-09: delete all versions up to the created_at of the deletion request
+			filter = nostr.Filter{Authors: []string{event.PubKey}, Kinds: []int{kind}, Until: &event.CreatedAt}
+
+			if kind >= 30000 && kind < 40000 {
+				// addressable events are identified by their d tag, an empty identifier is a valid value
+				dIdentifier := ""
+				if len(valueList) == 3 {
+					dIdentifier = valueList[2]
+				}
+				filter.Tags = nostr.TagMap{"d": []string{dIdentifier}}
 			}
 		} else {
 			continue
 		}
 		// take the predefined filter and start the fetching and deletion process
+		// the filters only match events of the requesting author, so everything found may be deleted
 		result, err := handlers.EventHandlerObject.GetEvents(filter)
 
 		if err != nil {
@@ -124,22 +139,13 @@ func (e *EventAdapter) Delete(event nostr.Event) (error, bool) {
 			return err, false
 		}
 
-		for _, res := range result {
-			if event.PubKey != res.Pubkey {
-				deleteAllowed = false
-				break
-			}
-		}
-
-		if deleteAllowed {
-			err = handlers.EventHandlerObject.DeleteEvents(result)
-			if err != nil {
-				log.Println(err)
-				return err, false
-			}
+		err = handlers.EventHandlerObject.DeleteEvents(result)
+		if err != nil {
+			log.Println(err)
+			return err, false
 		}
 	}
-	return nil, deleteAllowed
+	return nil, allPermitted
 
 }
 
