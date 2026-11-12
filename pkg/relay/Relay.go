@@ -21,7 +21,7 @@ import (
 
 type IRelay interface {
 	GetNIP11Information() nip11.RelayInformationDocument
-	HandleMessage(ctx any, ws *webSocket.WebSocket, message []byte)
+	HandleMessage(ctx *context.Context, ws *webSocket.WebSocket, message []byte)
 	ServiceURL() string
 }
 
@@ -48,7 +48,7 @@ func (relay *Relay) GetNIP11Information() nip11.RelayInformationDocument {
 		SupportedNIPs: supportedNIPs,
 		Software:      config.Config.NIP11Software,
 		Version:       config.Config.NIP11Version,
-		Icon:          config.Config.NIP11Banner,
+		Icon:          config.Config.NIP11Icon,
 		Banner:        config.Config.NIP11Banner,
 	}
 }

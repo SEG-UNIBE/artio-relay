@@ -66,7 +66,7 @@ func TestConfigRNIP11Params(t *testing.T) {
 		t.Fatalf("Error on NewConfiguration: %v", err)
 	}
 
-	if config.NIP11Version != "0.9" {
+	if config.NIP11Version != "1.1" {
 		t.Fatalf("NIP11 version should be 0.9 but got %v", config.NIP11Version)
 	}
 
