@@ -111,7 +111,7 @@ HandleWebsocket function to exract and delegate traffic from websockets.
 func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := s.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Fatalf("failed to upgrade websocket: %v", err)
+		log.Printf("failed to upgrade websocket: %v", err)
 		return
 	}
 
@@ -180,6 +180,11 @@ func (s *Server) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 			if typ == websocket.PingMessage {
 				_ = ws.WriteMessage(websocket.PongMessage, nil)
 				continue
+			}
+
+			// block until the client's rate limit allows another message (backpressure)
+			if err := ws.WaitForSlot(ctx); err != nil {
+				break
 			}
 
 			go s.relay.HandleMessage(&ctx, ws, message)
